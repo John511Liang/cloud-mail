@@ -1,3 +1,4 @@
+account_id = "${CLOUDFLARE_ACCOUNT_ID}"
 name = "${NAME}"
 main = "src/index.js"
 compatibility_date = "2025-06-04"
