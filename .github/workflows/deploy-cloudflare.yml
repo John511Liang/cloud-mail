@@ -114,7 +114,8 @@ jobs:
           name = "email"
           EOF
           fi
-
+          
+          sed -i "s|\${CLOUDFLARE_ACCOUNT_ID}|${CLOUDFLARE_ACCOUNT_ID}|g" "$CONFIG_FILE"
           sed -i "s|\${NAME}|${NAME}|g" "$CONFIG_FILE"
           sed -i "s|\${CUSTOM_DOMAIN}|${CUSTOM_DOMAIN}|g" "$CONFIG_FILE"
           sed -i "s|\"\${DOMAIN}\"|${DOMAIN}|g" "$CONFIG_FILE"
@@ -211,7 +212,7 @@ jobs:
         working-directory: ./mail-worker
         run: |
           echo "🚀 Starting deployment..."
-          pnpm wrangler deploy -c wrangler-action.toml 2>&1 \
+          pnpm wrangler deploy -c wrangler-action.toml --account-id ${CLOUDFLARE_ACCOUNT_ID} 2>&1 \
             | tee deploy.log \
             | grep -v "https://.*\.workers\.dev" \
             | sed -E 's/env\.domain .*/env.domain (***)/' \
