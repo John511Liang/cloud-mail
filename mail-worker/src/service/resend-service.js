@@ -1,9 +1,27 @@
 import emailService from './email-service';
 import { emailConst } from '../const/entity-const';
+import { Webhook } from 'svix';
+
+// Resend 回调验签：配置了 resend_webhook_secret 才强制验签；
+// 未配置时跳过验签并打警告日志，兼容尚未配置密钥的部署。
+function verifyWebhookPayload(c, rawBody, svixHeaders) {
+	const secret = (c.env.resend_webhook_secret || '').trim();
+	if (!secret) {
+		console.warn('resend webhook: resend_webhook_secret not configured, skipping signature verification');
+		return JSON.parse(rawBody);
+	}
+	try {
+		return new Webhook(secret).verify(rawBody, svixHeaders);
+	} catch (e) {
+		throw new Error(`resend webhook signature verification failed: ${e.message}`);
+	}
+}
 
 const resendService = {
 
-	async webhooks(c, body) {
+	async webhooks(c, rawBody, svixHeaders) {
+
+		const body = verifyWebhookPayload(c, rawBody, svixHeaders);
 
 		const params = {
 			resendEmailId: body.data.email_id,
